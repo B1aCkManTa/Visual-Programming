@@ -78,11 +78,11 @@ def SetY():
 
 # LOOKS
 def Say():
-    return ""
+    return "SAY " + currentBlock["inputs"]["MESSAGE"][1][1] + "\n"
 
 
 def SayForSecs():
-    return ""
+    return "SAY " + currentBlock["inputs"]["MESSAGE"][1][1] + " FOR " + currentBlock["inputs"]["SECS"][1][1] + " SECS\n"
 
 
 def Think():
@@ -99,7 +99,7 @@ def WhenFlagClicked():
 
 
 def WhenKeyPressed():
-    return ""
+    return "ON " + currentBlock["fields"]["KEY_OPTION"][0] + " PRESS\n"
 
 
 # CONTROL
