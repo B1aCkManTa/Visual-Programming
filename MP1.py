@@ -5,7 +5,7 @@ currentBlock = {}
 
 
 def LoadJSON(name):
-    file = open('./Input/' + name)
+    file = open('project.json')
     data = json.load(file)
     file.close()
     return data
@@ -50,14 +50,14 @@ def MoveSteps():
     # Get Direction based on Positive/Negative.
     Direction = "Backward" if (Number_Of_Steps <0) else "Forward"
     # Return Corresponding Pseudocode. 
-    return ("Move(" + str(abs(Number_Of_Steps)) + "," + Direction)+')\n'
+    return "Move" + Direction + " " + str(abs(Number_Of_Steps)) +'\n'
 
 def TurnRight():
-    return ""
+    return "TurnRight " + currentBlock["inputs"]["DEGREES"][1][1] + "\n"
 
 
 def TurnLeft():
-    return ""
+    return "TurnLeft " + currentBlock["inputs"]["DEGREES"][1][1] + "\n"
 
 
 def GotoXY():
@@ -66,34 +66,34 @@ def GotoXY():
     # Get Y-Coordinate
     Y = float(currentBlock["inputs"]["Y"][1][1])
     # Return Corresponding Pseudocode. 
-    return "GoToXY("+str(X)+","+str(Y)+")\n"
+    return "GoToXY "+str(X)+","+str(Y)+"\n"
 
 def ChangeXBy():
-    return ""
+    return "ChangeXBY " + currentBlock["inputs"]["DX"][1][1] +"\n"
 
 
 def SetX():
-    return ""
+    return "SetX " + currentBlock["inputs"]["X"][1][1] +"\n"
 
 
 def ChangeYBy():
     inputs = currentBlock['inputs']
     yInput = inputs['DY'][1][1]
-    return "CHANGE Y BY " + yInput + "\n"
+    return "ChangeYBY " + yInput + "\n"
 
 def SetY():
     inputs = currentBlock['inputs']
     yInput = inputs['Y'][1][1]
-    return "SET Y " + yInput + "\n"
+    return "SetY " + yInput + "\n"
 
 
 # LOOKS
 def Say():
-    return "SAY " + currentBlock["inputs"]["MESSAGE"][1][1] + "\n"
+    return "Say " + currentBlock["inputs"]["MESSAGE"][1][1] + "\n"
 
 
 def SayForSecs():
-    return "SAY " + currentBlock["inputs"]["MESSAGE"][1][1] + " FOR " + currentBlock["inputs"]["SECS"][1][1] + " SECS\n"
+    return "SayFOR " + currentBlock["inputs"]["MESSAGE"][1][1] + " ; " + currentBlock["inputs"]["SECS"][1][1] + "\n"
 
 
 def Think():
@@ -101,48 +101,116 @@ def Think():
 
 
 def ThinkForSecs():
-    return "Think " + currentBlock["inputs"]["MESSAGE"][1][1] + " FOR " + currentBlock["inputs"]["SECS"][1][1] + " SECS\n"
+    return "ThinkFOR " + currentBlock["inputs"]["MESSAGE"][1][1] + " ; " + currentBlock["inputs"]["SECS"][1][1] + "\n"
 
 
 # EVENT
 def WhenFlagClicked():
-    return "ON Flag Clicked\n"
+    return "OnFlagClicked\n"
 
 
 def WhenKeyPressed():
-    return "ON " + currentBlock["fields"]["KEY_OPTION"][0] + " PRESS\n"
+    return "OnPress " + currentBlock["fields"]["KEY_OPTION"][0] + "\n"
 
 
 # CONTROL
 def Forever():
-    return ""
+    contentRepeating = SubProgram(currentBlock["inputs"]["SUBSTACK"][1])
+    return "Forever "+ contentRepeating + "\n"
 
 
 def If():
-    return ""
+    global currentBlock
+    currentBlockTmp = currentBlock
+    condition = SubProgram(currentBlock["inputs"]["CONDITION"][1])
+    currentBlock = currentBlockTmp
+    thenPart = SubProgram(currentBlock["inputs"]["SUBSTACK"][1])
+    return "If "+ condition + "Then\n" + thenPart 
 
 
 def IfElse():
-    return ""
+    global currentBlock
+    currentBlockTmp = currentBlock
+    condition = SubProgram(currentBlock["inputs"]["CONDITION"][1])
+    currentBlock = currentBlockTmp
+    thenPart = SubProgram(currentBlock["inputs"]["SUBSTACK"][1])
+    currentBlock = currentBlockTmp
+    elsePart = SubProgram(currentBlock["inputs"]["SUBSTACK2"][1])
+    return "IfElse "+ condition + "Then\n " + thenPart +"Else\n"+ elsePart
 
 
 def Repeat():
-    return ""
+    numOfRepetitions = currentBlock["inputs"]["TIMES"][1][1]
+    contentRepeating = SubProgram(currentBlock["inputs"]["SUBSTACK"][1])
+    return "Repeat "+ contentRepeating + " ; " + numOfRepetitions + "\n"
 
 
 def Wait():
     # Get Number of Seconds.
     Seconds = float(currentBlock["inputs"]["DURATION"][1][1])
     # Return Corresponding Pseudocode. 
-    return "Wait("+str(Seconds)+")\n"
+    return "Wait "+str(Seconds)+"\n"
 
 
 def WaitUntil():
-    return ""
+    condition = SubProgram(currentBlock["inputs"]["CONDITION"][1])
+    return "WaitUntill "+ condition + "\n"
 
 
 def RepeatUntil():
-    return ""
+    global currentBlock
+    currentBlockTmp = currentBlock
+    condition = SubProgram(currentBlock["inputs"]["CONDITION"][1])
+    currentBlock = currentBlockTmp
+    contentRepeating = SubProgram(currentBlock["inputs"]["SUBSTACK"][1])
+    return "RepeatUntill  "+ contentRepeating + " ; " + condition + "\n"
+
+
+# OPERATORS
+def GreaterThanOp():
+    operand1 = currentBlock["inputs"]["OPERAND1"][1][1]
+    operand2 = currentBlock["inputs"]["OPERAND2"][1][1]
+    return "( "+ str(operand1) + " ) > ( " + str(operand2) + " )\n"
+    # return ""
+
+def LessThanOp():
+    operand1 = currentBlock["inputs"]["OPERAND1"][1][1]
+    operand2 = currentBlock["inputs"]["OPERAND2"][1][1]
+    return "( "+ str(operand1) + " ) < ( " + str(operand2) + " )\n"
+    # return ""
+
+
+def EqualsOp():
+    operand1 = currentBlock["inputs"]["OPERAND1"][1][1]
+    operand2 = currentBlock["inputs"]["OPERAND2"][1][1]
+    return "( "+ str(operand1) + " ) = ( " + str(operand2) + " )\n"
+    # return ""
+
+
+def NotOp():
+  return "Not ("+ SubProgram(currentBlock["inputs"]["OPERAND"][1]) +")\n"
+  # return ""
+
+
+def OrOp():
+    global currentBlock
+    currentBlockTmp = currentBlock
+    operand1 = SubProgram(currentBlock["inputs"]["OPERAND1"][1])
+    currentBlock = currentBlockTmp
+    operand2 = SubProgram(currentBlock["inputs"]["OPERAND2"][1])
+    return "( "+ operand1 + " ) OR ( " + operand2 + ")\n"
+    # return ""
+
+
+def AndOp():
+    global currentBlock
+    currentBlockTmp = currentBlock
+    operand1 = SubProgram(currentBlock["inputs"]["OPERAND1"][1])
+    currentBlock = currentBlockTmp
+    operand2 = SubProgram(currentBlock["inputs"]["OPERAND2"][1])
+    return "( "+ operand1 + " ) AND ( " + operand2 + ")\n"
+    # return ""
+
 
 
 switcher = {
@@ -170,6 +238,12 @@ switcher = {
     "control_wait": Wait,
     "control_wait_until": WaitUntil,
     "control_repeat_until": RepeatUntil,
+    "operator_gt" : GreaterThanOp,
+    "operator_lt" : LessThanOp,
+    "operator_equals" : EqualsOp,
+    "operator_not" : NotOp,
+    "operator_or" : OrOp,
+    "operator_and" : AndOp,
 }
 
 myPrograms = Parse('project.json')
