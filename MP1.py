@@ -53,11 +53,18 @@ def MoveSteps():
     return ("Move(" + str(abs(Number_Of_Steps)) + "," + Direction)+')'
 
 def TurnRight():
-    return ""
+    #Getting the current degree and orientation
+
+    Y = currentBlock["inputs"]["DEGREES"][1][1]
+
+    return "Change orientation by "+Y
 
 
 def TurnLeft():
-    return ""
+    #Getting the current degree and orientation
+    Y = currentBlock["inputs"]["DEGREES"][1][1]
+
+    return "Change orientation by "+"-"+Y
 
 
 def GotoXY():
