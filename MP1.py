@@ -97,11 +97,11 @@ def SayForSecs():
 
 
 def Think():
-    return "SAY " + currentBlock["inputs"]["MESSAGE"][1][1] + "\n"
+    return "Think " + currentBlock["inputs"]["MESSAGE"][1][1] + "\n"
 
 
 def ThinkForSecs():
-    return "SAY " + currentBlock["inputs"]["MESSAGE"][1][1] + " FOR " + currentBlock["inputs"]["SECS"][1][1] + " SECS\n"
+    return "Think " + currentBlock["inputs"]["MESSAGE"][1][1] + " FOR " + currentBlock["inputs"]["SECS"][1][1] + " SECS\n"
 
 
 # EVENT
