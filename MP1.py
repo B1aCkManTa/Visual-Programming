@@ -45,8 +45,12 @@ def Parse(name):
 
 # MOTION
 def MoveSteps():
-    return ""
-
+    # Get Number of Steps.
+    Number_Of_Steps = float(currentBlock["inputs"]["STEPS"][1][1])
+    # Get Direction based on Positive/Negative.
+    Direction = "Backward" if (Number_Of_Steps <0) else "Forward"
+    # Return Corresponding Pseudocode. 
+    return ("Move(" + str(abs(Number_Of_Steps)) + "," + Direction)+')'
 
 def TurnRight():
     return ""
@@ -57,8 +61,12 @@ def TurnLeft():
 
 
 def GotoXY():
-    return ""
-
+    # Get X-Coordinate
+    X = float(currentBlock["inputs"]["X"][1][1])
+    # Get Y-Coordinate
+    Y = float(currentBlock["inputs"]["Y"][1][1])
+    # Return Corresponding Pseudocode. 
+    return "GoToXY("+str(X)+","+str(Y)+")"
 
 def ChangeXBy():
     return ""
@@ -120,7 +128,10 @@ def Repeat():
 
 
 def Wait():
-    return ""
+    # Get Number of Seconds.
+    Seconds = float(currentBlock["inputs"]["DURATION"][1][1])
+    # Return Corresponding Pseudocode. 
+    return "Wait("+str(Seconds)+")"
 
 
 def WaitUntil():
