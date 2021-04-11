@@ -50,7 +50,7 @@ def MoveSteps():
     # Get Direction based on Positive/Negative.
     Direction = "Backward" if (Number_Of_Steps <0) else "Forward"
     # Return Corresponding Pseudocode. 
-    return ("Move(" + str(abs(Number_Of_Steps)) + "," + Direction)+')'
+    return ("Move(" + str(abs(Number_Of_Steps)) + "," + Direction)+')\n'
 
 def TurnRight():
     return ""
@@ -66,7 +66,7 @@ def GotoXY():
     # Get Y-Coordinate
     Y = float(currentBlock["inputs"]["Y"][1][1])
     # Return Corresponding Pseudocode. 
-    return "GoToXY("+str(X)+","+str(Y)+")"
+    return "GoToXY("+str(X)+","+str(Y)+")\n"
 
 def ChangeXBy():
     return ""
@@ -134,7 +134,7 @@ def Wait():
     # Get Number of Seconds.
     Seconds = float(currentBlock["inputs"]["DURATION"][1][1])
     # Return Corresponding Pseudocode. 
-    return "Wait("+str(Seconds)+")"
+    return "Wait("+str(Seconds)+")\n"
 
 
 def WaitUntil():
