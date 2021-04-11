@@ -77,11 +77,14 @@ def SetX():
 
 
 def ChangeYBy():
-    return ""
-
+    inputs = currentBlock['inputs']
+    yInput = inputs['DY'][1][1]
+    return "CHANGE Y BY " + yInput + "\n"
 
 def SetY():
-    return ""
+    inputs = currentBlock['inputs']
+    yInput = inputs['Y'][1][1]
+    return "SET Y " + yInput + "\n"
 
 
 # LOOKS
