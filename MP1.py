@@ -106,7 +106,7 @@ def ThinkForSecs():
 
 # EVENT
 def WhenFlagClicked():
-    return "ON Flag Cicked\n"
+    return "ON Flag Clicked\n"
 
 
 def WhenKeyPressed():
