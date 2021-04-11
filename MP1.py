@@ -4,7 +4,7 @@ blocks = {}
 currentBlock = {}
 
 
-def LoadJSON(name):
+def LoadJSON():
     file = open('project.json')
     data = json.load(file)
     file.close()
@@ -30,8 +30,8 @@ def SubProgram(startBlockRef):
     return subProgram
 
 
-def Parse(name):
-    data = LoadJSON(name)
+def Parse():
+    data = LoadJSON()
     global blocks
     blocks = data['targets'][1]['blocks']
     startBlocks = StartBlocks()
@@ -46,167 +46,230 @@ def Parse(name):
 # MOTION
 def MoveSteps():
     # Get Number of Steps.
-    Number_Of_Steps = float(currentBlock["inputs"]["STEPS"][1][1])
-    # Get Direction based on Positive/Negative.
-    Direction = "Backward" if (Number_Of_Steps <0) else "Forward"
-    # Return Corresponding Pseudocode. 
-    return "Move"; + Direction + " " + str(abs(Number_Of_Steps)) +'\n'
+    Number_Of_Steps = "0" if (currentBlock['inputs']['STEPS'][1][1] == "") else currentBlock['inputs']['STEPS'][1][1]
+    Number_Of_Steps = float(Number_Of_Steps)
+    Direction = "Backward" if (Number_Of_Steps < 0) else "Forward"
+    return "MoveSteps;" + Direction + ";" + str(abs(Number_Of_Steps)) + '\n'
+
 
 def TurnRight():
-    return "TurnRight; " + currentBlock["inputs"]["DEGREES"][1][1] + "\n"
+    value = "0" if (currentBlock['inputs']['DEGREES'][1][1] == "") else currentBlock['inputs']['DEGREES'][1][1]
+    return "TurnRight;" + value + "\n"
 
 
 def TurnLeft():
-    return "TurnLeft; " + currentBlock["inputs"]["DEGREES"][1][1] + "\n"
+    value = "0" if (currentBlock['inputs']['DEGREES'][1][1] == "") else currentBlock['inputs']['DEGREES'][1][1]
+    return "TurnLeft;" + value + "\n"
 
 
 def GotoXY():
-    # Get X-Coordinate
-    X = float(currentBlock["inputs"]["X"][1][1])
-    # Get Y-Coordinate
-    Y = float(currentBlock["inputs"]["Y"][1][1])
-    # Return Corresponding Pseudocode. 
-    return "GoToXY; "+str(X)+","+str(Y)+"\n"
+    valueX = "0" if (currentBlock['inputs']['X'][1][1] == "") else currentBlock['inputs']['X'][1][1]
+    valueY = "0" if (currentBlock['inputs']['Y'][1][1] == "") else currentBlock['inputs']['Y'][1][1]
+    return "GoToXY;" + valueX + ";" + valueY + "\n"
+
 
 def ChangeXBy():
-    return "ChangeXBY; " + currentBlock["inputs"]["DX"][1][1] +"\n"
+    value = "0" if (currentBlock['inputs']['DX'][1][1] == "") else currentBlock['inputs']['DX'][1][1]
+    return "ChangeXBY;" + value + "\n"
 
 
 def SetX():
-    return "SetX; " + currentBlock["inputs"]["X"][1][1] +"\n"
+    value = "0" if (currentBlock['inputs']['X'][1][1] == "") else currentBlock['inputs']['X'][1][1]
+    return "SetX;" + value + "\n"
 
 
 def ChangeYBy():
-    inputs = currentBlock['inputs']
-    yInput = inputs['DY'][1][1]
-    return "ChangeYBY; " + yInput + "\n"
+    value = "0" if (currentBlock['inputs']['DY'][1][1] == "") else currentBlock['inputs']['DY'][1][1]
+    return "ChangeYBY;" + value + "\n"
+
 
 def SetY():
-    inputs = currentBlock['inputs']
-    yInput = inputs['Y'][1][1]
-    return "SetY; " + yInput + "\n"
+    value = "0" if (currentBlock['inputs']['Y'][1][1] == "") else currentBlock['inputs']['Y'][1][1]
+    return "SetY;" + value + "\n"
 
 
 # LOOKS
 def Say():
-    return "Say; " + currentBlock["inputs"]["MESSAGE"][1][1] + "\n"
+    return "Say;" + currentBlock["inputs"]["MESSAGE"][1][1] + "\n"
 
 
 def SayForSecs():
-    return "SayFOR; " + currentBlock["inputs"]["MESSAGE"][1][1] + " ; " + currentBlock["inputs"]["SECS"][1][1] + "\n"
+    duration = "0" if (currentBlock["inputs"]["SECS"][1][1] == "") else currentBlock["inputs"]["SECS"][1][1]
+    return "SayForSecs;" + currentBlock["inputs"]["MESSAGE"][1][1] + ";" + duration + "\n"
 
 
 def Think():
-    return "Think; " + currentBlock["inputs"]["MESSAGE"][1][1] + "\n"
+    return "Think;" + currentBlock["inputs"]["MESSAGE"][1][1] + "\n"
 
 
 def ThinkForSecs():
-    return "ThinkFOR; " + currentBlock["inputs"]["MESSAGE"][1][1] + " ; " + currentBlock["inputs"]["SECS"][1][1] + "\n"
+    duration = "0" if (currentBlock["inputs"]["SECS"][1][1] == "") else currentBlock["inputs"]["SECS"][1][1]
+    return "ThinkForSecs;" + currentBlock["inputs"]["MESSAGE"][1][1] + ";" + duration + "\n"
 
 
 # EVENT
 def WhenFlagClicked():
-    return "OnFlagClicked;\n"
+    return "WhenFlagClicked\n"
 
 
 def WhenKeyPressed():
-    return "OnPress; " + currentBlock["fields"]["KEY_OPTION"][0] + "\n"
+    return "WhenKeyPressed;" + currentBlock["fields"]["KEY_OPTION"][0] + "\n"
 
 
 # CONTROL
 def Forever():
-    contentRepeating = SubProgram(currentBlock["inputs"]["SUBSTACK"][1])
-    return "Forever; "+ contentRepeating + "\n"
+    global currentBlock
+    currentBlockTmp = currentBlock
+    try:
+        contentRepeating = SubProgram(currentBlock["inputs"]["SUBSTACK"][1])
+    except KeyError:
+        contentRepeating = ""
+    currentBlock = currentBlockTmp
+    return "Forever\n" + contentRepeating
 
 
 def If():
     global currentBlock
     currentBlockTmp = currentBlock
-    condition = SubProgram(currentBlock["inputs"]["CONDITION"][1])
+    try:
+        condition = SubProgram(currentBlock["inputs"]["CONDITION"][1])
+    except KeyError:
+        condition = "False"
     currentBlock = currentBlockTmp
-    thenPart = SubProgram(currentBlock["inputs"]["SUBSTACK"][1])
-    return "If; "+ condition + ";Then\n" + thenPart 
+    try:
+        thenPart = SubProgram(currentBlock["inputs"]["SUBSTACK"][1])
+    except KeyError:
+        thenPart = ""
+    currentBlock = currentBlockTmp
+    return "If;" + condition + "\nThen\n" + thenPart + "EndThen\n"
 
 
 def IfElse():
     global currentBlock
     currentBlockTmp = currentBlock
-    condition = SubProgram(currentBlock["inputs"]["CONDITION"][1])
+    try:
+        condition = SubProgram(currentBlock["inputs"]["CONDITION"][1])
+    except KeyError:
+        condition = "False"
     currentBlock = currentBlockTmp
-    thenPart = SubProgram(currentBlock["inputs"]["SUBSTACK"][1])
+    try:
+        thenPart = SubProgram(currentBlock["inputs"]["SUBSTACK"][1])
+    except KeyError:
+        thenPart = ""
     currentBlock = currentBlockTmp
-    elsePart = SubProgram(currentBlock["inputs"]["SUBSTACK2"][1])
-    return "IfElse; "+ condition + ";Then\n " + thenPart +";Else\n"+ elsePart
+    try:
+        elsePart = SubProgram(currentBlock["inputs"]["SUBSTACK2"][1])
+    except KeyError:
+        elsePart = ""
+    currentBlock = currentBlockTmp
+    return "IfElse;" + condition + "\nThen\n" + thenPart + "EndThen\n" + "Else\n" + elsePart + "EndElse\n"
 
 
 def Repeat():
-    numOfRepetitions = currentBlock["inputs"]["TIMES"][1][1]
-    contentRepeating = SubProgram(currentBlock["inputs"]["SUBSTACK"][1])
-    return "Repeat; "+ contentRepeating + " ; " + numOfRepetitions + "\n"
+    global currentBlock
+    currentBlockTmp = currentBlock
+    numOfRepetitions = "0" if (currentBlock["inputs"]["TIMES"][1][1] == "") else currentBlock["inputs"]["TIMES"][1][1]
+    currentBlock = currentBlockTmp
+    try:
+        contentRepeating = SubProgram(currentBlock["inputs"]["SUBSTACK"][1])
+    except KeyError:
+        contentRepeating = ""
+    currentBlock = currentBlockTmp
+    return "Repeat;" + numOfRepetitions + "\n" + "Begin\n" + contentRepeating + "End\n"
 
 
 def Wait():
-    # Get Number of Seconds.
-    Seconds = float(currentBlock["inputs"]["DURATION"][1][1])
-    # Return Corresponding Pseudocode. 
-    return "Wait; "+str(Seconds)+"\n"
+    duration = "0" if (currentBlock["inputs"]["DURATION"][1][1] == "") else currentBlock["inputs"]["DURATION"][1][1]
+    return "Wait;" + duration + "\n"
 
 
 def WaitUntil():
-    condition = SubProgram(currentBlock["inputs"]["CONDITION"][1])
-    return "WaitUntill; "+ condition + "\n"
+    global currentBlock
+    currentBlockTmp = currentBlock
+    try:
+        condition = SubProgram(currentBlock["inputs"]["CONDITION"][1])
+    except KeyError:
+        condition = "False"
+    currentBlock = currentBlockTmp
+    return "WaitUntill;" + condition + "\n"
 
 
 def RepeatUntil():
     global currentBlock
     currentBlockTmp = currentBlock
-    condition = SubProgram(currentBlock["inputs"]["CONDITION"][1])
+    try:
+        condition = SubProgram(currentBlock["inputs"]["CONDITION"][1])
+    except KeyError:
+        condition = "False"
     currentBlock = currentBlockTmp
-    contentRepeating = SubProgram(currentBlock["inputs"]["SUBSTACK"][1])
-    return "RepeatUntill;  "+ contentRepeating + " ; " + condition + "\n"
+    try:
+        contentRepeating = SubProgram(currentBlock["inputs"]["SUBSTACK"][1])
+    except KeyError:
+        contentRepeating = ""
+    currentBlock = currentBlockTmp
+    return "RepeatUntill;" + condition + "\n" + "Begin\n" + contentRepeating + "End\n"
 
 
 # OPERATORS
 def GreaterThanOp():
     operand1 = currentBlock["inputs"]["OPERAND1"][1][1]
     operand2 = currentBlock["inputs"]["OPERAND2"][1][1]
-    return "( "+ str(operand1) + " ) > ( " + str(operand2) + " )"
+    return "( " + str(operand1) + " ) > ( " + str(operand2) + " )"
 
 
 def LessThanOp():
     operand1 = currentBlock["inputs"]["OPERAND1"][1][1]
     operand2 = currentBlock["inputs"]["OPERAND2"][1][1]
-    return "( "+ str(operand1) + " ) < ( " + str(operand2) + " )"
-
+    return "( " + str(operand1) + " ) < ( " + str(operand2) + " )"
 
 
 def EqualsOp():
     operand1 = currentBlock["inputs"]["OPERAND1"][1][1]
     operand2 = currentBlock["inputs"]["OPERAND2"][1][1]
-    return "( "+ str(operand1) + " ) = ( " + str(operand2) + " )"
+    return "( " + str(operand1) + " ) = ( " + str(operand2) + " )"
 
 
 def NotOp():
-  return "Not ("+ SubProgram(currentBlock["inputs"]["OPERAND"][1]) +")"
+    global currentBlock
+    currentBlockTmp = currentBlock
+    try:
+        subOp = SubProgram(currentBlock["inputs"]["OPERAND"][1])
+    except KeyError:
+        subOp = "False"
+    currentBlock = currentBlockTmp
+    return "Not (" + subOp + ")"
 
 
 def OrOp():
     global currentBlock
     currentBlockTmp = currentBlock
-    operand1 = SubProgram(currentBlock["inputs"]["OPERAND1"][1])
+    try:
+        operand1 = SubProgram(currentBlock["inputs"]["OPERAND1"][1])
+    except KeyError:
+        operand1 = "False"
     currentBlock = currentBlockTmp
-    operand2 = SubProgram(currentBlock["inputs"]["OPERAND2"][1])
-    return "( "+ operand1 + " ) OR ( " + operand2 + ")"
+    try:
+        operand2 = SubProgram(currentBlock["inputs"]["OPERAND2"][1])
+    except KeyError:
+        operand2 = "False"
+    currentBlock = currentBlockTmp
+    return "( " + operand1 + " ) OR ( " + operand2 + ")"
 
 
 def AndOp():
     global currentBlock
     currentBlockTmp = currentBlock
-    operand1 = SubProgram(currentBlock["inputs"]["OPERAND1"][1])
+    try:
+        operand1 = SubProgram(currentBlock["inputs"]["OPERAND1"][1])
+    except KeyError:
+        operand1 = "False"
     currentBlock = currentBlockTmp
-    operand2 = SubProgram(currentBlock["inputs"]["OPERAND2"][1])
-    return "( "+ operand1 + " ) AND ( " + operand2 + ")"
-
+    try:
+        operand2 = SubProgram(currentBlock["inputs"]["OPERAND2"][1])
+    except KeyError:
+        operand2 = "False"
+    currentBlock = currentBlockTmp
+    return "( " + operand1 + " ) AND ( " + operand2 + ")"
 
 
 switcher = {
@@ -234,13 +297,14 @@ switcher = {
     "control_wait": Wait,
     "control_wait_until": WaitUntil,
     "control_repeat_until": RepeatUntil,
-    "operator_gt" : GreaterThanOp,
-    "operator_lt" : LessThanOp,
-    "operator_equals" : EqualsOp,
-    "operator_not" : NotOp,
-    "operator_or" : OrOp,
-    "operator_and" : AndOp,
+
+    "operator_gt": GreaterThanOp,
+    "operator_lt": LessThanOp,
+    "operator_equals": EqualsOp,
+    "operator_not": NotOp,
+    "operator_or": OrOp,
+    "operator_and": AndOp,
 }
 
-myPrograms = Parse('project.json')
+myPrograms = Parse()
 print(myPrograms)
