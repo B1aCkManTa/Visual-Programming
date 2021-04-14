@@ -272,6 +272,12 @@ def AndOp():
     return "( " + operand1 + " ) AND ( " + operand2 + ")"
 
 
+def PseudoOutput(programs):
+    for index, program in enumerate(programs):
+        print("PROGRAM " + str(index + 1))
+        print(program)
+
+
 switcher = {
     "motion_movesteps": MoveSteps,
     "motion_turnright": TurnRight,
@@ -307,4 +313,4 @@ switcher = {
 }
 
 myPrograms = Parse()
-print(myPrograms)
+PseudoOutput(myPrograms)
