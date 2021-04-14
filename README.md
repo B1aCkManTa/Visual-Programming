@@ -4,7 +4,7 @@ Here is a discription of the functionality and implementation of the project.
 
 ## Execution
 
-The file `MP1.py` contains all the code implementation of the project and is the only thing that need to be executed. The code acts on a file named `project.json` that holds a `JSON` representation of a **Scratch** code. the `project.json` file has to be in the same directory which `MP1.py` is run from. When the file is run, the console will print a list of strings signifying the textual representations of parallel sub-programs present in the **Scratch** code.
+The file `MP1.py` contains all the code implementation of the project and is the only thing that need to be executed. The code acts on a file named `project.json` that holds a `JSON` representation of a **Scratch 3/online** code. the `project.json` file has to be in the same directory which `MP1.py` is run from. When the file is run, the console will print a list of strings signifying the textual representations of parallel sub-programs present in the **Scratch** code.
 
 ---
 
