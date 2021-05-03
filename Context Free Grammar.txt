@@ -1,0 +1,129 @@
+S --> Event Program
+
+Event --> WhenFlagClicked
+        | WhenKeyPressed
+
+WhenFlagClicked --> "WhenFlagClicked\n"
+
+WhenKeyPressed --> "WhenKeyPressed;" Key "\n"
+
+Key   --> "any"
+        | "up arrow"
+        | "down arrow"
+        | "left arrow"
+        | "right arrow"
+        | "space"
+        | ["a"-"z"]
+        | ["0"-"9"]
+
+Program   --> Block
+            | Block Program
+
+Block --> OneBlock
+        | NestedBlock
+
+OneBlock  --> MoveSteps
+            | TurnRight
+            | TurnLeft
+            | GotoXY
+            | ChangeXBy
+            | SetX
+            | ChangeYBy
+            | SetY
+            | Say
+            | SayForSecs
+            | Think
+            | ThinkForSecs
+            | Wait
+            | WaitUntil
+
+MoveSteps --> "MoveSteps;" Direction ";" Number "\n"
+
+Direction --> "Forward"
+            | "Backward"
+
+Number    --> Decimal
+            | Decimal "e" Decimal
+            | Decimal "e-" Decimal
+
+Decimal   --> Integer
+            | Integer "." Integer
+            | "." Integer
+            | Integer "."
+
+Integer   --> ["0"-"9"]
+            | ["1"-"9"] IntegerRest
+
+IntegerRest   --> ["0"-"9"]
+                | ["0"-"9"] IntegerRest
+
+TurnRight --> "TurnRight;" SignedNumber "\n"
+
+SignedNumber  --> Number
+                | "-" Number
+
+TurnLeft --> "TurnLeft;" SignedNumber "\n"
+
+GotoXY --> "GoToXY;" SignedNumber ";" SignedNumber "\n"
+
+ChangeXBy --> "ChangeXBY;" SignedNumber "\n"
+
+SetX --> "SetX;" SignedNumber "\n"
+
+ChangeYBy --> "ChangeYBY;" SignedNumber "\n"
+
+SetY --> "SetY;" SignedNumber "\n"
+
+Say --> "Say;" String "\n"
+
+String --> just any String
+
+SayForSecs --> "SayForSecs;" String ";" Number "\n"
+
+Think --> "Think;" String "\n"
+
+ThinkForSecs --> "ThinkForSecs;" String ";" Number "\n"
+
+Wait --> "Wait\n" Number "\n"
+
+WaitUntil --> "WaitUntil;" Condition "\n"
+
+Condition --> GreaterThanOp
+            | LessThanOp
+            | EqualsOp
+            | AndOp
+            | OrOp
+            | NotOp
+            | "True"
+            | "False"
+
+GreaterThanOp --> "(" SignedNumber ")" > "(" SignedNumber ")"
+
+LessThanOp --> "(" SignedNumber ")" < "(" SignedNumber ")"
+
+EqualsOp --> "(" SignedNumber ")" = "(" SignedNumber ")"
+
+AndOp --> "(" Condition ") AND (" Condition ")"
+
+OrOp --> "(" Condition ") OR (" Condition ")"
+
+NotOp --> "NOT (" Condition ")"
+
+NestedBlock   --> Forever
+                | If
+                | IfElse
+                | Repeat
+                | RepeatUntil
+
+Forever --> "Forever\n" SubProgram
+
+SubProgram    --> ""
+                | Program
+
+If --> "If;" Condition "\nThen\n" SubProgram "EndThen\n"
+
+IfElse --> "IfElse;" Condition "\nThen\n" SubProgram "EndThen\nElse\n" SubProgram "EndElse\n"
+
+Repeat --> "Repeat;" Integer "\nBegin\n" SubProgram "End\n"
+
+RepeatUntil --> "RepeatUntil;" Condition "\nBegin\n" SubProgram "End\n"

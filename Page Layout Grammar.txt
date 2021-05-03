@@ -1,0 +1,147 @@
+S --> union({Program}, S)
+    | {}
+
+Program   --> above(StartBlock, SubProgram)
+            | StartBlock
+            | SubProgram
+
+StartBlock    --> WhenFlagClicked
+                | WhenKeyPressed
+
+WhenFlagClicked --> contains(start_yellow_block, concatinate("when", concatinate(green_flag, "clicked")))
+
+WhenKeyPressed --> contains(start_yellow_block, concatinate("when", concatinate(contains(rectangle, concatinate(Key, drop_down_arrow)), "key pressed")))
+
+Key   --> "any"
+        | "up arrow"
+        | "down arrow"
+        | "left arrow"
+        | "right arrow"
+        | "space"
+        | ["a"-"z"]
+        | ["0"-"9"]
+
+SubProgram    --> above(Block, SubProgram)
+                | Block
+
+Block --> SimpleBlock
+        | NestedBlock
+
+SimpleBlock   --> MoveSteps
+                | TurnRight
+                | TurnLeft
+                | GotoXY
+                | ChangeXBy
+                | SetX
+                | ChangeYBy
+                | SetY
+                | Say
+                | SayForSecs
+                | Think
+                | ThinkForSecs
+
+MoveSteps --> contains(blue_block, concatinate("move", concatinate(Value, "steps")))
+
+Value --> contains(oval, number)
+
+TurnRight --> contains(blue_block, concatinate("turn", concatinate(right_turn_arrow, concatinate(Value, "degrees"))))
+
+TurnLeft --> contains(blue_block, concatinate("turn", concatinate(left_turn_arrow, concatinate(Value, "degrees"))))
+
+GotoXY --> contains(blue_block, concatinate("go to x:", concatinate(Value, contatinate("y:", Value))))
+
+ChangeXBy --> contains(blue_block, concatinate("change x by", Value))
+
+SetX --> contains(blue_block, concatinate("set x to", Value))
+
+ChangeYBy --> contains(blue_block, concatinate("change y by", Value))
+
+SetY --> contains(blue_block, concatinate("set y to", Value))
+
+Say --> contains(purple_block, concatinate("say", Text))
+
+Text --> contains(oval, text)
+
+SayForSecs --> contains(purple_block, concatinate("say", concatinate(Text, concatinate("for", concatinate(Value, "seconds")))))
+
+Think --> contains(purple_block, concatinate("think", Text))
+
+ThinkForSecs --> contains(purple_block, concatinate("think", concatinate(Text, concatinate("for", concatinate(Value, "seconds")))))
+
+NestedBlock   --> Forever
+                | If
+                | IfElse
+                | Repeat
+                | RepeatUntil
+
+Forever --> above(contains_left(orange_block, "forever"), above(concatinate(orange_wall, OptionalSubProgram), contains_right(orange_block, rewind_arrow)))
+
+OptionalSubProgram    --> empty_block
+                        | SubProgram
+
+If --> above(contains(orange_block, concatinate("if", concatinate(OptionalCondition, "then"))), above(concatinate(orange_wall, OptionalSubProgram), orange_block))
+
+OptionalCondition --> empty_rhombus
+                    | contains(green_rhombus, Condition)
+
+Condition --> GreaterThan
+            | LessThan
+            | Equals
+            | And
+            | Or
+            | Not
+
+GreaterThan --> concatinate(Value, concatinate(">", Value))
+
+LessThan --> concatinate(Value, concatinate("<", Value))
+
+Equals --> concatinate(Value, concatinate("=", Value))
+
+And --> concatinate(OptionalCondition, concatinate("and", OptionalCondition))
+
+Or --> concatinate(OptionalCondition, concatinate("or", OptionalCondition))
+
+Not --> concatinate("not", OptionalCondition)
+
+IfElse --> above(contains(orange_block, concatinate("if", concatinate(OptionalCondition, "then"))), above(concatinate(orange_wall, OptionalSubProgram), above(contains_left(orange_block, "else"), above(concatinate(orange_wall, OptionalSubProgram), orange_block))))
+
+Repeat --> above(contains_left(orange_block, concatinate("repeat", contains(oval, integer))), above(concatinate(orange_wall, OptionalSubProgram), contains_right(orange_block, rewind_arrow)))
+
+RepeatUntil --> above(contains_left(orange_block, concatinate("repeat until", OptionalCondition)), above(concatinate(orange_wall, OptionalSubProgram), contains_right(orange_block, rewind_arrow)))
+
+orange_block
+orange_wall
+
+-------------------------------------------------
+WHERE
+    A --> above(B, C) {
+        B.b == C.t
+        B.l == C.l
+    }
+
+    A --> concatinate(B, C) {
+        B.t == C.t
+        B.b == C.b
+        B.r == C.l
+    }
+
+    A --> contains(B, C) {
+        B.t >= C.t
+        B.b <= C.b
+        B.l <= C.l
+        B.r >= C.r
+    }
+
+    A --> contains_left(B, C) {
+        B.t >= C.t
+        B.b <= C.b
+        B.l == C.l
+        B.r >= C.r
+    }
+
+    A --> contains_right(B, C) {
+        B.t >= C.t
+        B.b <= C.b
+        B.l <= C.l
+        B.r == C.r
+    }
