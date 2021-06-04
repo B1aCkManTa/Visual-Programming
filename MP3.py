@@ -1,6 +1,9 @@
 import turtle
 from MP1 import Parse
 from ConditionParser import ParseCondition
+import time
+import threading
+import random
 
 def ParseIntermediate(rotine):
     indents = 0
@@ -98,30 +101,39 @@ def RepeatUntil(instruction, indents):
 def Say(instruction, indents):
     instructionTokens = instruction.split(";")
     words = instructionTokens[1]
-    return ("\t" * indents + "text.write(" + words + ", font=('Arial',15,'bold'), align='left)\n", indents)
+    return ("\t" * indents + "text.write(" + words + ", font=('Arial',15,'bold'), align='right')\n", indents)
 
 def SayForSecs(instruction, indents):
     instructionTokens = instruction.split(";")
     words = instructionTokens[1]
     duration = instructionTokens[2]
-    return ("\t" * indents + "text.write(" + words + ", font=('Arial',15,'bold'), align='left)\n" +
+    return ("\t" * indents + "text.write(" + words + ", font=('Arial',15,'bold'), align='right')\n" +
         "\t" * indents + "turtle.delay(" + (int(duration) * 1000) + " *)\n" +
         "\t" * indents + "text.clear()\n", indents)
 
 def Think(instruction, indents):
     instructionTokens = instruction.split(";")
-    words = instructionTokens[1]
-    return ("\t" * indents + "text.write(" + words + ", font=('Corier',15,'italic'), align='left)\n", indents)
+    words = '"' + instructionTokens[1] + '"'
+    return ("\t" * indents + "text.clear()\n" +
+            "\t" * indents + "text.write(" + words + ", font=('Corier',15,'italic'), align='right')\n", indents)
 
 def ThinkForSecs(instruction, indents):
     instructionTokens = instruction.split(";")
-    words = instructionTokens[1]
-    duration = instructionTokens[2]
-    return ("\t" * indents + "text.write(" + words + ", font=('Corier',15,'italic'), align='left)\n" +
-        "\t" * indents + "turtle.delay(" + (int(duration) * 1000) + " *)\n" +
+    words = '"' + instructionTokens[1] + '"'
+    duration = int(instructionTokens[2])
+    # Random = str(random.randint(0,1000000))
+    # timerRandom = "timer" + Random
+    # textTurtle = "text" + Random
+    # print(textTurtle)
+    return (
+        "\t" * indents + "text.clear()\n" +
+        "\t" * indents + "text.write(" + words + ", font=('Corier',15,'italic'), align='right')\n" +
+        "\t" * indents + "time.sleep(" + str(duration) + ")" + "\n" +
         "\t" * indents + "text.clear()\n", indents)
 
-
+def CallBack(textRandom):
+    textRandom.clear
+    print(textRandom + " HERE")
     
 parseMapper = {
     "MoveSteps": MoveSteps,
@@ -161,19 +173,31 @@ turtle.penup()
 
 turtle_height = turtle.shapesize()[0]
 turtle_width = turtle.shapesize()[1]
-
 text = turtle.Turtle()
-text.hideturtle()
+# text.hideturtle()
 text.penup()
+text.left(90)
+text.forward(70)
+text.right(90)
+text.forward(60)
+print(turtle.pos())
+text.color('red', 'green')
+# text.forward(200)
+# timer = threading.Timer(2.0, text.clear)
+# text.write("Hello World", move=False, font=('Courier', 15, 'normal'), align='left')
+# timer.start()
 
-text.write("Hello Turtle", move=False, font=('Courier', 15, 'normal'), align='left')
-text.write("Hello World", move=False, font=('Courier', 15, 'normal'), align='left')
 
-codeList = ["MoveSteps;Forward;100"] #Parse()
+codeList = ["Think;HELLOOOO", "MoveSteps;Forward;200"] #Parse()
 code = ""
 for subcode in codeList:
     code += ParseIntermediate(subcode) + "\n"
 
 exec(code)
+text.forward(20)
+# turtle.write("Hello Turtle", move=False, font=('Courier', 15, 'normal'), align='left')
 
 screen.mainloop()
+
+
+
