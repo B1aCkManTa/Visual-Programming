@@ -8,7 +8,7 @@ import keyboard
 
 lastSaid = ""
 sayOrThink = "italic"
-keyPressed = False
+Flag = False
 
 def ParseIntermediate(rotine):
     indents = 0
@@ -193,9 +193,17 @@ def WhenKeyPressed(instruction, indents):
     Key = ParseCondition(instructionTokens[1])
     return ("\t" * indents + "keyboard.wait(" +Key+")\n", indents)
 
-# def WhenFlagClicked(instruction, indents):
+def WhenFlagClicked(instruction, indents):
+    global Flag
+    return ("\t" * indents + "turtle.onclick(foo)\n" + 
+            "\t" * indents + "while(True):\n" +
+            "\t" * (indents+1) + "Flag = False" +
+            "\t" * (indents+1) + "while(!Flag):\n", indents + 1 )
 
 
+
+
+    
 parseMapper = {
     "MoveSteps": MoveSteps,
     "Begin": Begin,
@@ -221,9 +229,10 @@ parseMapper = {
     "Say": Say,
     "SayForSecs": SayForSecs,
     "Think": Think,
-    "ThinkForSecs": ThinkForSecs
+    "ThinkForSecs": ThinkForSecs,
+    "WhenFlagClicked":WhenFlagClicked,
+    "WhenKeyPressed":WhenKeyPressed
 }
-
 
 screen = turtle.getscreen()
 scratchName = "scratch.gif"
@@ -253,15 +262,26 @@ text.color('blue', 'black')
 # text.write("Hello World", move=False, font=('Courier', 15, 'normal'), align='left')
 # timer.start()
 
-
 # codeList = ["Repeat;10\nBegin\nSay;HELLOOOO\nTurnRight;90\nMoveSteps;Forward;45\nEnd"] #Parse()
 codeList = ["IfElse;( 40 ) > ( 50 )\nThen\nRepeat;3\nBegin\nThink;Hmm...\nTurnRight;15\nMoveSteps;Forward;15.0\nEnd\nEndThen\nElse\nRepeat;5\nBegin\nSay;Hello!\nTurnRight;15\nMoveSteps;Forward;40.0\nEnd\nEndElse"] #Parse()
 code = ""
 for subcode in codeList:
     code += ParseIntermediate(subcode) + "\n"
 
-# exec(code)
+exec(code)
 # turtle.write("Hello Turtle", move=False, font=('Courier', 15, 'normal'), align='left')
+# print("out")
 
-# screen.mainloop()
+
+# def foo(x,y):
+#     print("Hello")
+#     global Flag
+#     Flag = True
+
+# turtle.onclick(foo)
+
+
+
+# print("in")
+screen.mainloop()
 

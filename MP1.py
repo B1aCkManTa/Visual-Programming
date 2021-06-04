@@ -5,7 +5,7 @@ currentBlock = {}
 
 
 def LoadJSON():
-    file = open('project.json')
+    file = open('project_test3.json')
     data = json.load(file)
     file.close()
     return data
