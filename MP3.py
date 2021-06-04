@@ -1,5 +1,6 @@
 import turtle
 from MP1 import Parse
+from ConditionParser import ParseCondition
 
 def ParseIntermediate(rotine):
     indents = 0
@@ -25,7 +26,8 @@ def MoveSteps(instruction, indents):
     instructionTokens = instruction.split(";")
     direction = "forward" if instructionTokens[1] == "Forward" else "backward"
     steps = instructionTokens[2]
-    return ("\t" * indents + "turtle." + direction + "(" + steps + ")\n", indents)
+    return ("\t" * indents + "turtle." + direction + "(" + steps + ")\n" +
+        "\t" * indents + "text." + direction + "(" + steps + ")\n", indents)
 
 def Repeat(instruction, indents):
     instructionTokens = instruction.split(";")
@@ -42,22 +44,85 @@ def TurnLeft(instruction, indents):
     degree = instructionTokens[1]
     return ("\t" * indents + "turtle.left(" + degree + ")\n", indents)
 
-# def GotoXY(x,y):
-#     turtle.goto(x,y)
+def GotoXY(instruction, indents):
+    instructionTokens = instruction.split(";")
+    X = instructionTokens[1]
+    Y = instructionTokens[2]
+    return ("\t" * indents + "turtle.goto(" + X + "," + Y + ")\n" +
+        "\t" * indents + "text.goto(" + X + "," + Y + ")\n", indents)
 
-# def ChangeXBy(value):
-#     turtle.setx(turtle.xcor+value)
+def ChangeXBy(instruction, indents):
+    instructionTokens = instruction.split(";")
+    ChangeInX = instructionTokens[1]
+    return ("\t" * indents + "turtle.setx(turtle.xcor+" + ChangeInX + ")\n" +
+        "\t" * indents + "text.setx(turtle.xcor+" + ChangeInX + ")\n", indents)
 
-# def SetX(value):
-#     turtle.setx(value)
+def SetX(instruction, indents):
+    instructionTokens = instruction.split(";")
+    X = instructionTokens[1]
+    return ("\t" * indents + "turtle.setx(" + X + ")\n", indents)
 
-# def ChangeYBy(value):
-#     turtle.sety(turtle.ycor+value)
+def ChangeYBy(instruction, indents):
+    instructionTokens = instruction.split(";")
+    ChangeInY = instructionTokens[1]
+    return ("\t" * indents + "turtle.sety(turtle.ycor+" + ChangeInY + ")\n", indents)
 
-# def SetY(value):
-#     turtle.sety(value)
+def SetY(instruction, indents):
+    instructionTokens = instruction.split(";")
+    Y = instructionTokens[1]
+    return ("\t" * indents + "turtle.sety(" + Y + ")\n", indents)
+
+def Forever(indents):
+    return ("\t" * indents + "while(True):\n", indents + 1)
+    
+def If(instruction, indents):
+    instructionTokens = instruction.split(";")
+    condition = ParseCondition(instructionTokens[1])
+    return ("\t" * indents + "if " + condition + " :\n", indents + 1)
+    
+def Wait(instruction, indents):
+    instructionTokens = instruction.split(";")
+    duration = instructionTokens[1]
+    return ("\t" * indents + "turtle.delay(" + (int(duration*1000)) + ")\n", indents)
+
+def WaitUntil(instruction, indents):
+    instructionTokens = instruction.split(";")
+    condition = ParseCondition(instructionTokens[1])
+    return ("\t" * indents + "while(!(" + condition +")):\n" + "\t" * (indents+1) + "turtle.delay(1000)\n", indents)
+
+def RepeatUntil(instruction, indents):
+    instructionTokens = instruction.split(";")
+    condition = ParseCondition(instructionTokens[1])
+    return ("\t" * indents + "while(!(" + condition +")):\n", indents)
+
+def Say(instruction, indents):
+    instructionTokens = instruction.split(";")
+    words = instructionTokens[1]
+    return ("\t" * indents + "text.write(" + words + ", font=('Arial',15,'bold'), align='left)\n", indents)
+
+def SayForSecs(instruction, indents):
+    instructionTokens = instruction.split(";")
+    words = instructionTokens[1]
+    duration = instructionTokens[2]
+    return ("\t" * indents + "text.write(" + words + ", font=('Arial',15,'bold'), align='left)\n" +
+        "\t" * indents + "turtle.delay(" + (int(duration) * 1000) + " *)\n" +
+        "\t" * indents + "text.clear()\n", indents)
+
+def Think(instruction, indents):
+    instructionTokens = instruction.split(";")
+    words = instructionTokens[1]
+    return ("\t" * indents + "text.write(" + words + ", font=('Corier',15,'italic'), align='left)\n", indents)
+
+def ThinkForSecs(instruction, indents):
+    instructionTokens = instruction.split(";")
+    words = instructionTokens[1]
+    duration = instructionTokens[2]
+    return ("\t" * indents + "text.write(" + words + ", font=('Corier',15,'italic'), align='left)\n" +
+        "\t" * indents + "turtle.delay(" + (int(duration) * 1000) + " *)\n" +
+        "\t" * indents + "text.clear()\n", indents)
 
 
+    
 parseMapper = {
     "MoveSteps": MoveSteps,
     "Begin": Begin,
@@ -65,7 +130,24 @@ parseMapper = {
     "EndThen": End,
     "EndElse": End,
     "Else": Else,
-    "Repeat": Repeat
+    "Repeat": Repeat,
+    "TurnRight": TurnRight,
+    "TurnLeft": TurnLeft,
+    "GotoXY": GotoXY,
+    "ChangeXBy": ChangeXBy,
+    "SetX": SetX,
+    "ChangeYBy": ChangeYBy,
+    "SetY": SetY,
+    "Forever": Forever,
+    "If": If,
+    "IfElse": If,
+    "Wait": Wait,
+    "WaitUntil": WaitUntil,
+    "RepeatUntil": RepeatUntil,
+    "Say": Say,
+    "SayForSecs": SayForSecs,
+    "Think": Think,
+    "ThinkForSecs": ThinkForSecs
 }
 
 
@@ -76,6 +158,16 @@ turtle.addshape(scratchName)
 turtle.shape(scratchName)
 turtle.speed(1)
 turtle.penup()
+
+turtle_height = turtle.shapesize()[0]
+turtle_width = turtle.shapesize()[1]
+
+text = turtle.Turtle()
+text.hideturtle()
+text.penup()
+
+text.write("Hello Turtle", move=False, font=('Courier', 15, 'normal'), align='left')
+text.write("Hello World", move=False, font=('Courier', 15, 'normal'), align='left')
 
 codeList = ["MoveSteps;Forward;100"] #Parse()
 code = ""
