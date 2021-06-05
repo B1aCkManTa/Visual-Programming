@@ -208,6 +208,8 @@ text.penup()
 written = ""
 font = ("Ariel", 15, "bold")
 
+screen_width, screen_height = screen.screensize()
+
 def handle_click(xpos, ypos):
     if xpos >= flag.xcor() - 35 and xpos <= flag.xcor() + 35 and ypos >= flag.ycor() - 35 and ypos <= flag.ycor() + 35:
         exec(eventMapper['flag'])
@@ -216,10 +218,9 @@ for input in list(string.ascii_lowercase) + ['space', 'up_arrow', 'down_arrow', 
     # exec("def handle_" + input + "():\n\tglobal key\n\tglobal pause\n\tif key == 'any' or key == '" + input + "':\n\t\tpause = False\n\t\tkey = ''")
     exec("def handle_" + input + "():\n\texec(eventMapper['" + input.replace('_', ' ') + "'])\n")
 
-for input in list(string.ascii_lowercase):
+for input in list(string.ascii_lowercase) + ['space']:
     turtle.onkeypress(globals()["handle_" + input], input)
 
-screen.onkeypress(globals()["handle_space"], 'space')
 screen.onkeypress(globals()["handle_up_arrow"], 'Up')
 screen.onkeypress(globals()["handle_down_arrow"], 'Down')
 screen.onkeypress(globals()["handle_left_arrow"], 'Left')
@@ -243,10 +244,15 @@ for subcode in codeList:
         eventMapper['empty'] += code
 
 for event in list(string.ascii_lowercase) + ['space', 'up arrow', 'down arrow', 'left arrow', 'right arrow']:
-    eventMapper[event] = "global written\nwritten = ''\nglobal font\nfont = ('Ariel', 15, 'bold')\n" + eventMapper[event] + eventMapper['any']
+    eventMapper[event] += eventMapper['any']
 
-for event in ['empty', 'flag']:
-    eventMapper[event] = "global written\nwritten = ''\nglobal font\nfont = ('Ariel', 15, 'bold')\n" + eventMapper[event]
+for event in ['empty', 'flag','space', 'up arrow', 'down arrow', 'left arrow', 'right arrow']:
+    eventMapper[event] = ("global written\nwritten = ''\nglobal font\nfont = ('Ariel', 15, 'bold')\n" +
+        eventMapper[event] +
+        "if turtle.xcor() < -screen_width:\n" + ChangeXBy("ChangeXBY;-screen_width - turtle.xcor()", 1)[0] +
+        "if turtle.xcor() > screen_width:\n" + ChangeXBy("ChangeXBY;screen_width - turtle.xcor()", 1)[0] +
+        "if turtle.ycor() < -screen_height:\n" + ChangeYBy("ChangeYBY;-screen_height - turtle.ycor()", 1)[0] +
+        "if turtle.ycor() > screen_height:\n" + ChangeYBy("ChangeYBY;screen_height - turtle.ycor()", 1)[0] )
 
 exec(eventMapper['empty'])
 
