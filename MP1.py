@@ -1,11 +1,12 @@
 import json
+from re import sub
 
 blocks = {}
 currentBlock = {}
 
 
-def LoadJSON():
-    file = open('project.json')
+def LoadJSON(name):
+    file = open(name)
     data = json.load(file)
     file.close()
     return data
@@ -30,8 +31,8 @@ def SubProgram(startBlockRef):
     return subProgram
 
 
-def Parse():
-    data = LoadJSON()
+def Parse(name):
+    data = LoadJSON(name)
     global blocks
     blocks = data['targets'][1]['blocks']
     startBlocks = StartBlocks()
@@ -109,6 +110,8 @@ def ThinkForSecs():
 
 # EVENT
 def WhenFlagClicked():
+    global isGreenFlagEvent
+    isGreenFlagEvent = True
     return "WhenFlagClicked\n"
 
 
@@ -312,5 +315,5 @@ switcher = {
     "operator_and": AndOp,
 }
 
-myPrograms = Parse()
-PseudoOutput(myPrograms)
+# myPrograms = Parse('project.json')
+# PseudoOutput(myPrograms)
