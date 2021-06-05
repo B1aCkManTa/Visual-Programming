@@ -3,11 +3,10 @@ from re import sub
 
 blocks = {}
 currentBlock = {}
-isGreenFlagEvent = False
 
 
 def LoadJSON():
-    file = open('project_test3.json')
+    file = open('project.json')
     data = json.load(file)
     file.close()
     return data
@@ -22,7 +21,6 @@ def StartBlocks():
 
 
 def SubProgram(startBlockRef):
-    global isGreenFlagEvent
     currentBlockRef = startBlockRef
     subProgram = ""
     while currentBlockRef is not None:
@@ -30,9 +28,6 @@ def SubProgram(startBlockRef):
         currentBlock = blocks[currentBlockRef]
         subProgram += switcher[currentBlock['opcode']]()
         currentBlockRef = currentBlock['next']
-    if isGreenFlagEvent:
-        subProgram += "End"
-    isGreenFlagEvent = False
     return subProgram
 
 
@@ -117,7 +112,7 @@ def ThinkForSecs():
 def WhenFlagClicked():
     global isGreenFlagEvent
     isGreenFlagEvent = True
-    return "WhenFlagClicked\nBegin\n"
+    return "WhenFlagClicked\n"
 
 
 def WhenKeyPressed():
