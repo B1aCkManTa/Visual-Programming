@@ -69,13 +69,13 @@ class Condition (Grammar):
         return self[0].value()
 
 class AndOp (Grammar):
-    grammar = (L('('), Condition, L(') And ('), Condition, L(')'))
+    grammar = (L('('), Condition, L(') AND ('), Condition, L(')'))
 
     def value(self):
         return self[0].string + self[1].value() + ') and (' + self[3].value() + self[4].string
 
 class OrOp (Grammar):
-    grammar = (L('('), Condition, L(') Or ('), Condition, L(')'))
+    grammar = (L('('), Condition, L(') OR ('), Condition, L(')'))
 
     def value(self):
         return self[0].string + self[1].value() + ') or (' + self[3].value() + self[4].string

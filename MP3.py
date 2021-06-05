@@ -18,13 +18,16 @@ def ParseIntermediate(rotine):
     return result
 
 def Begin(instruction, indents):
-    return ("", indents + 1)
+    return ("\t" * indents + "\tpass\n", indents + 1)
 
 def End(instruction, indents):
     return ("", indents - 1)
 
+def Then(instruction, indents):
+    return ("\t" * indents + "\tpass\n", indents + 1)
+
 def Else(instruction, indents):
-    return ("\t" * indents + "else\n", indents + 1)
+    return ("\t" * indents + "else:\n" + "\t" * indents + "\tpass\n", indents + 1)
 
 def MoveSteps(instruction, indents):
     instructionTokens = instruction.split(";")
@@ -49,7 +52,7 @@ def TurnLeft(instruction, indents):
     return ("\t" * indents + "turtle.left(" + degree + ")\n" +
         "\t" * indents + "turtle.shape('icons\\\\' + str(round(float(turtle.heading())) % 360) + '.gif')\n", indents)
 
-def GotoXY(instruction, indents):
+def GoToXY(instruction, indents):
     instructionTokens = instruction.split(";")
     X = instructionTokens[1]
     Y = instructionTokens[2]
@@ -58,7 +61,7 @@ def GotoXY(instruction, indents):
 def ChangeXBy(instruction, indents):
     instructionTokens = instruction.split(";")
     ChangeInX = instructionTokens[1]
-    return ("\t" * indents + "turtle.setx(turtle.xcor+" + ChangeInX + ")\n" + + MoveText(indents), indents)
+    return ("\t" * indents + "turtle.setx(turtle.xcor() + " + ChangeInX + ")\n" + MoveText(indents), indents)
 
 def SetX(instruction, indents):
     instructionTokens = instruction.split(";")
@@ -68,7 +71,7 @@ def SetX(instruction, indents):
 def ChangeYBy(instruction, indents):
     instructionTokens = instruction.split(";")
     ChangeInY = instructionTokens[1]
-    return ("\t" * indents + "turtle.sety(turtle.ycor+" + ChangeInY + ")\n" + MoveText(indents), indents)
+    return ("\t" * indents + "turtle.sety(turtle.ycor() + " + ChangeInY + ")\n" + MoveText(indents), indents)
 
 def SetY(instruction, indents):
     instructionTokens = instruction.split(";")
@@ -76,27 +79,27 @@ def SetY(instruction, indents):
     return ("\t" * indents + "turtle.sety(" + Y + ")\n" + MoveText(indents), indents)
 
 def Forever(indents):
-    return ("\t" * indents + "while(True):\n", indents + 1)
+    return ("\t" * indents + "while(True):\n" + "\t" * indents + "\tpass\n", indents + 1)
     
 def If(instruction, indents):
     instructionTokens = instruction.split(";")
     condition = ParseCondition(instructionTokens[1])
-    return ("\t" * indents + "if " + condition + " :\n", indents + 1)
+    return ("\t" * indents + "if " + condition + " :\n", indents)
     
 def Wait(instruction, indents):
     instructionTokens = instruction.split(";")
     duration = instructionTokens[1]
-    return ("\t" * indents + "turtle.delay(" + (int(duration*1000)) + ")\n", indents)
+    return ("\t" * indents + "time.sleep(" + str(duration) + ")\n", indents)
 
 def WaitUntil(instruction, indents):
     instructionTokens = instruction.split(";")
     condition = ParseCondition(instructionTokens[1])
-    return ("\t" * indents + "while(!(" + condition +")):\n" + "\t" * (indents+1) + "turtle.delay(1000)\n", indents)
+    return ("\t" * indents + "while(not (" + condition +")):\n" + "\t" * (indents+1) + "turtle.delay(1000)\n", indents)
 
 def RepeatUntil(instruction, indents):
     instructionTokens = instruction.split(";")
     condition = ParseCondition(instructionTokens[1])
-    return ("\t" * indents + "while(!(" + condition +")):\n", indents)
+    return ("\t" * indents + "while(not (" + condition +")):\n", indents)
 
 def Say(instruction, indents):
     instructionTokens = instruction.split(";")
@@ -145,14 +148,15 @@ parseMapper = {
     "Repeat": Repeat,
     "TurnRight": TurnRight,
     "TurnLeft": TurnLeft,
-    "GotoXY": GotoXY,
-    "ChangeXBy": ChangeXBy,
+    "GoToXY": GoToXY,
+    "ChangeXBY": ChangeXBy,
     "SetX": SetX,
-    "ChangeYBy": ChangeYBy,
+    "ChangeYBY": ChangeYBy,
     "SetY": SetY,
     "Forever": Forever,
     "If": If,
     "IfElse": If,
+    "Then": Then,
     "Wait": Wait,
     "WaitUntil": WaitUntil,
     "RepeatUntil": RepeatUntil,
@@ -165,7 +169,7 @@ parseMapper = {
 }
 
 eventMapper = {}
-for event in list(string.ascii_lowercase) + ['space', 'up_arrow', 'down_arrow', 'left_arrow', 'right_arrow', 'empty', 'flag', 'any']:
+for event in list(string.ascii_lowercase) + ['space', 'up arrow', 'down arrow', 'left arrow', 'right arrow', 'empty', 'flag', 'any']:
     eventMapper[event] = ''
 
 
@@ -210,7 +214,7 @@ def handle_click(xpos, ypos):
 
 for input in list(string.ascii_lowercase) + ['space', 'up_arrow', 'down_arrow', 'left_arrow', 'right_arrow']:
     # exec("def handle_" + input + "():\n\tglobal key\n\tglobal pause\n\tif key == 'any' or key == '" + input + "':\n\t\tpause = False\n\t\tkey = ''")
-    exec("def handle_" + input + "():\n\texec(eventMapper['" + input + "'])\n")
+    exec("def handle_" + input + "():\n\texec(eventMapper['" + input.replace('_', ' ') + "'])\n")
 
 for input in list(string.ascii_lowercase):
     turtle.onkeypress(globals()["handle_" + input], input)
@@ -226,8 +230,11 @@ screen.onclick(handle_click)
 screen.listen()
 
 codeList = Parse() # ['WhenFlagClicked\nTurnLeft;30\n', 'WhenFlagClicked\nMoveSteps;Forward;100\n', 'WhenKeyPressed;space\nThink;Hmm', 'SayForSecs;Hi There;1', 'WhenKeyPressed;a\nSay;World']
+# codeList = ["WhenFlagClicked\nIfElse;( 40 ) > ( 50 )\nThen\nRepeat;3\nBegin\nThink;Hmm...\nTurnRight;15\nMoveSteps;Forward;15.0\nEnd\nEndThen\nElse\nRepeat;1\nBegin\nSay;Hello!\nTurnRight;90\nMoveSteps;Forward;50.0\nEnd\nEndElse\n",
+# "WhenFlagClicked\nMoveSteps;Forward;90.0\n"]
+
 for subcode in codeList:
-    code = "global written\nglobal font\n" + ParseIntermediate(subcode)
+    code = ParseIntermediate(subcode)
     if subcode.startswith('WhenFlagClicked'):
         eventMapper['flag'] += code
     elif subcode.startswith('WhenKeyPressed'):
@@ -235,10 +242,12 @@ for subcode in codeList:
     else:
         eventMapper['empty'] += code
 
-for event in list(string.ascii_lowercase) + ['space', 'up_arrow', 'down_arrow', 'left_arrow', 'right_arrow']:
-    eventMapper[event] += eventMapper['any']
+for event in list(string.ascii_lowercase) + ['space', 'up arrow', 'down arrow', 'left arrow', 'right arrow']:
+    eventMapper[event] = "global written\nwritten = ''\nglobal font\nfont = ('Ariel', 15, 'bold')\n" + eventMapper[event] + eventMapper['any']
 
-print(eventMapper)
+for event in ['empty', 'flag']:
+    eventMapper[event] = "global written\nwritten = ''\nglobal font\nfont = ('Ariel', 15, 'bold')\n" + eventMapper[event]
+
 exec(eventMapper['empty'])
 
 screen.mainloop()
