@@ -33,7 +33,7 @@ def ParseIntermediate(rotine):
 
 
 def Begin(instruction, indents):
-    return "\t" * (indents+1) + "pass\n", indents + 1
+    return "\t" * (indents + 1) + "pass\n", indents + 1
 
 
 def End(instruction, indents):
@@ -142,7 +142,8 @@ def SetY(instruction, indents):
             indents)
 
 
-def Forever(indents):
+def Forever(instruction, indents):
+    # return "\t" * indents + "pass\n", indents
     return ("\t" * indents + "while(True):\n" +
             "\t" * (indents + 1) + "pass\n", indents + 1)
 
@@ -154,26 +155,26 @@ def If(instruction, indents):
 
 
 def Then(instruction, indents):
-    return ("\t" * indents + "pass\n", indents)
+    return "\t" * indents + "pass\n", indents
 
 
 def Wait(instruction, indents):
     instructionTokens = instruction.split(";")
     duration = int(instructionTokens[1])
-    return ("\t" * indents + "time.sleep(" + str(duration) + ")" + "\n", indents)
+    return "\t" * indents + "time.sleep(" + str(duration) + ")" + "\n", indents
 
 
 def WaitUntil(instruction, indents):
     instructionTokens = instruction.split(";")
     condition = ParseCondition(instructionTokens[1])
-    return ("\t" * indents + "while(!(" + condition + ")):\n" +
-            "\t" * indents + "time.sleep(" + str(1) + ")" + "\n", indents)
+    return "\t" * indents + "while(not(" + condition + ")):\n" + \
+           "\t" * (indents + 1) + "time.sleep(" + str(1) + ")" + "\n", indents + 1
 
 
 def RepeatUntil(instruction, indents):
     instructionTokens = instruction.split(";")
     condition = ParseCondition(instructionTokens[1])
-    return "\t" * indents + "while(!(" + condition + ")):\n" + \
+    return "\t" * indents + "while(not(" + condition + ")):\n" + \
            "\t" * (indents + 1) + "pass\n", indents
 
 
@@ -235,12 +236,14 @@ def WhenKeyPressed(instruction, indents):
     Key = instructionTokens[1]
     if Key == "any":
         Key = "a"
+        # return "\t" * indents + "pause()\n", indents
+        # return "\t" * indents + "keyboard.read_key()\n", indents
+        # return "\t" * indents + "time.sleep(0.5)\n" + "\t" * indents + "keyboard.read_key()\n", indents
     return "\t" * indents + "keyboard.wait(" + "\"" + str(Key.split(" ")[0]) + "\"" + ")\n", indents
 
 
 def WhenFlagClicked(instruction, indents):
     global Flag
-    global counter
     global greenFlagExists
     if not greenFlagExists:
         greenFlagExists = True
@@ -277,15 +280,14 @@ parseMapper = {
     "Then": Then,
     "IfElse": If,
     "Wait": Wait,
-    "WaitUntil": WaitUntil,
-    "RepeatUntil": RepeatUntil,
+    "WaitUntill": WaitUntil,
+    "RepeatUntill": RepeatUntil,
     "Say": Say,
     "SayForSecs": SayForSecs,
     "Think": Think,
     "ThinkForSecs": ThinkForSecs,
     "WhenFlagClicked": WhenFlagClicked,
-    "WhenKeyPressed": WhenKeyPressed,
-    "EndFlagClicked": EndFlagClicked
+    "WhenKeyPressed": WhenKeyPressed
 }
 
 
@@ -331,17 +333,5 @@ for subcode in codeList:
     code += ParseIntermediate(subcode) + "\n"
 print(code)
 exec(code)
-
-# turtle.write("Hello Turtle", move=False, font=('Courier', 15, 'normal'), align='left')
-# print("out")
-
-
-# def foo(x,y):
-#     print("Hello")
-#     global Flag
-#     Flag = True
-
-# turtle.onclick(foo)
-
-# print("in")
 screen.mainloop()
+
