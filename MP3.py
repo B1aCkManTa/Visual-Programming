@@ -9,14 +9,18 @@ import keyboard
 lastSaid = "\"\""
 sayOrThink = "italic"
 Flag = False
-greenFlagExists = False
+isGreenFlagEvent = False
+isKeyPressEvent = False
+key = ""
+
+events = {}
 
 
 def ParseIntermediate(rotine):
-    if greenFlagExists:
-        indents = 1
-    else:
-        indents = 0
+    global isKeyPressEvent
+    global isGreenFlagEvent
+    global key
+    indents = 0
     result = ""
     rotineList = rotine.split("\n")
     for instruction in rotineList:
@@ -29,7 +33,27 @@ def ParseIntermediate(rotine):
         result += parsed[0]
         indents = parsed[1]
 
-    return result
+    if isGreenFlagEvent:
+        if "GreenFlag" in events:
+            last = events["GreenFlag"]
+            last += result
+            events["GreenFlag"] = last
+        else:
+            events["GreenFlag"] = result
+    elif isKeyPressEvent:
+        if key in events:
+            last = events[key]
+            last += result
+            events[key] = last
+        else:
+            events[key] = result
+    if isKeyPressEvent or isGreenFlagEvent:
+        isGreenFlagEvent = False
+        isKeyPressEvent = False
+        key = ""
+        return result, False
+    else:
+        return result, True
 
 
 def Begin(instruction, indents):
@@ -53,9 +77,12 @@ def MoveSteps(instruction, indents):
     direction = "forward" if instructionTokens[1] == "Forward" else "backward"
     steps = instructionTokens[2]
     return ("\t" * indents + "turtle." + direction + "(" + steps + ")\n" +
-            "\t" * indents + "text." + direction + "(" + steps + ")\n" +
-            "\t" * indents + "text.clear()\n" +
-            "\t" * indents + "text.write(" + lastSaid + ", move=True ,font=('Corier',15,'" + sayOrThink + "'), align='right')\n",
+            "\t" * indents + "if out_of_bounds(turtle):\n" +
+            "\t" * (indents + 1) + "turtle.undo()\n" +
+            "\t" * indents + "else:\n" +
+            "\t" * (indents + 1) + "text." + direction + "(" + steps + ")\n" +
+            "\t" * (indents + 1) + "text.clear()\n" +
+            "\t" * (indents + 1) + "text.write(" + lastSaid + ", move=True ,font=('Corier',15,'" + sayOrThink + "'), align='right')\n",
             indents)
 
 
@@ -67,18 +94,28 @@ def Repeat(instruction, indents):
 
 # Done
 def TurnRight(instruction, indents):
+    global lastSaid
+    global sayOrThink
     instructionTokens = instruction.split(";")
     degree = instructionTokens[1]
     return ("\t" * indents + "turtle.right(" + degree + ")\n" +
-            "\t" * indents + "text.right(" + degree + ")\n", indents)
+            "\t" * indents + "text.right(" + degree + ")\n" +
+            "\t" * indents + "text.clear()\n" +
+            "\t" * indents + "text.write(" + lastSaid + ", move=True ,font=('Corier',15,'" + sayOrThink + "'), align='right')\n"
+            , indents)
 
 
 # Done
 def TurnLeft(instruction, indents):
+    global lastSaid
+    global sayOrThink
     instructionTokens = instruction.split(";")
     degree = instructionTokens[1]
     return ("\t" * indents + "turtle.left(" + degree + ")\n" +
-            "\t" * indents + "text.left(" + degree + ")\n", indents)
+            "\t" * indents + "text.left(" + degree + ")\n" +
+            "\t" * indents + "text.clear()\n" +
+            "\t" * indents + "text.write(" + lastSaid + ", move=True ,font=('Corier',15,'" + sayOrThink + "'), align='right')\n"
+            , indents)
 
 
 def GotoXY(instruction, indents):
@@ -88,9 +125,13 @@ def GotoXY(instruction, indents):
     X = instructionTokens[1]
     Y = instructionTokens[2]
     return ("\t" * indents + "turtle.goto(" + X + "," + Y + ")\n" +
-            "\t" * indents + "text.goto(" + X + "," + Y + ")\n" +
-            "\t" * indents + "text.clear()\n" +
-            "\t" * indents + "text.write(" + lastSaid + ", move=True ,font=('Corier',15,'" + sayOrThink + "'), align='right')\n",
+            "\t" * indents + "if out_of_bounds(turtle):\n" +
+            "\t" * (indents + 1) + "turtle.undo()\n" +
+            "\t" * indents + "else:\n" +
+            "\t" * (indents + 1) + "text.goto(" + X + "," + Y + ")\n" +
+            "\t" * (indents + 1) + "text.clear()\n" +
+            "\t" * (
+                        indents + 1) + "text.write(" + lastSaid + ", move=True ,font=('Corier',15,'" + sayOrThink + "'), align='right')\n",
             indents)
 
 
@@ -100,9 +141,13 @@ def ChangeXBy(instruction, indents):
     instructionTokens = instruction.split(";")
     ChangeInX = instructionTokens[1]
     return ("\t" * indents + "turtle.setx(turtle.xcor()+" + ChangeInX + ")\n" +
-            "\t" * indents + "text.setx(turtle.xcor()+" + ChangeInX + ")\n" +
-            "\t" * indents + "text.clear()\n" +
-            "\t" * indents + "text.write(" + lastSaid + ", move=True ,font=('Corier',15,'" + sayOrThink + "'), align='right')\n",
+            "\t" * indents + "if out_of_bounds(turtle):\n" +
+            "\t" * (indents + 1) + "turtle.undo()\n" +
+            "\t" * indents + "else:\n" +
+            "\t" * (indents + 1) + "text.setx(turtle.xcor()+" + ChangeInX + ")\n" +
+            "\t" * (indents + 1) + "text.clear()\n" +
+            "\t" * (
+                        indents + 1) + "text.write(" + lastSaid + ", move=True ,font=('Corier',15,'" + sayOrThink + "'), align='right')\n",
             indents)
 
 
@@ -112,9 +157,13 @@ def SetX(instruction, indents):
     instructionTokens = instruction.split(";")
     X = instructionTokens[1]
     return ("\t" * indents + "turtle.setx(" + X + ")\n" +
-            "\t" * indents + "text.setx(" + X + ")\n" +
-            "\t" * indents + "text.clear()\n" +
-            "\t" * indents + "text.write(" + lastSaid + ", move=True ,font=('Corier',15,'" + sayOrThink + "'), align='right')\n",
+            "\t" * indents + "if out_of_bounds(turtle):\n" +
+            "\t" * (indents + 1) + "turtle.undo()\n" +
+            "\t" * indents + "else:\n" +
+            "\t" * (indents + 1) + "text.setx(" + X + ")\n" +
+            "\t" * (indents + 1) + "text.clear()\n" +
+            "\t" * (
+                        indents + 1) + "text.write(" + lastSaid + ", move=True ,font=('Corier',15,'" + sayOrThink + "'), align='right')\n",
             indents)
 
 
@@ -124,9 +173,13 @@ def ChangeYBy(instruction, indents):
     instructionTokens = instruction.split(";")
     ChangeInY = instructionTokens[1]
     return ("\t" * indents + "turtle.sety(turtle.ycor()+" + ChangeInY + ")\n" +
-            "\t" * indents + "text.sety(turtle.ycor()+" + ChangeInY + ")\n" +
-            "\t" * indents + "text.clear()\n" +
-            "\t" * indents + "text.write(" + lastSaid + ", move=True ,font=('Corier',15,'" + sayOrThink + "'), align='right')\n",
+            "\t" * indents + "if out_of_bounds(turtle):\n" +
+            "\t" * (indents + 1) + "turtle.undo()\n" +
+            "\t" * indents + "else:\n" +
+            "\t" * (indents + 1) + "text.sety(turtle.ycor()+" + ChangeInY + ")\n" +
+            "\t" * (indents + 1) + "text.clear()\n" +
+            "\t" * (
+                        indents + 1) + "text.write(" + lastSaid + ", move=True ,font=('Corier',15,'" + sayOrThink + "'), align='right')\n",
             indents)
 
 
@@ -136,9 +189,13 @@ def SetY(instruction, indents):
     instructionTokens = instruction.split(";")
     Y = instructionTokens[1]
     return ("\t" * indents + "turtle.sety(" + Y + ")\n" +
-            "\t" * indents + "text.sety(" + Y + ")\n" +
-            "\t" * indents + "text.clear()\n" +
-            "\t" * indents + "text.write(" + lastSaid + ", move=True ,font=('Corier',15,'" + sayOrThink + "'), align='right')\n",
+            "\t" * indents + "if out_of_bounds(turtle):\n" +
+            "\t" * (indents + 1) + "turtle.undo()\n" +
+            "\t" * indents + "else:\n" +
+            "\t" * (indents + 1) + "text.sety(" + Y + ")\n" +
+            "\t" * (indents + 1) + "text.clear()\n" +
+            "\t" * (
+                        indents + 1) + "text.write(" + lastSaid + ", move=True ,font=('Corier',15,'" + sayOrThink + "'), align='right')\n",
             indents)
 
 
@@ -232,32 +289,42 @@ def ThinkForSecs(instruction, indents):
 
 
 def WhenKeyPressed(instruction, indents):
+    global isKeyPressEvent
+    global key
+    isKeyPressEvent = True
     instructionTokens = instruction.split(";")
-    Key = instructionTokens[1]
-    if Key == "any":
-        Key = "a"
-        # return "\t" * indents + "pause()\n", indents
-        # return "\t" * indents + "keyboard.read_key()\n", indents
-        # return "\t" * indents + "time.sleep(0.5)\n" + "\t" * indents + "keyboard.read_key()\n", indents
-    return "\t" * indents + "keyboard.wait(" + "\"" + str(Key.split(" ")[0]) + "\"" + ")\n", indents
+    Key = instructionTokens[1].replace(" ", "")
+    key = Key
+    return "", indents
 
 
 def WhenFlagClicked(instruction, indents):
     global Flag
-    global greenFlagExists
-    if not greenFlagExists:
-        greenFlagExists = True
-        return "turtle.onclick(foo)\n" + \
-               "while True:\n" + \
-               "\t" * 1 + "Flag = False\n" + \
-               "\t" * 1 + "while(not Flag):\n" + \
-               "\t" * 2 + "turtle.onclick(foo)\n" + \
-               "\t" * 2 + "time.sleep(0.25)\n", 1
-    return "", 1
+    # global greenFlagExists
+    global isGreenFlagEvent
+    isGreenFlagEvent = True
+    return "", 0
 
 
-def EndFlagClicked(instruction, indents):
-    return "", indents
+def exec_GreenFlagEvent(x, y):
+    exec(events["GreenFlag"])
+
+
+def out_of_bounds(turtle):
+    return not (-width // 2 < turtle.xcor() < width // 2 and -height // 2 < turtle.ycor() < height // 2)
+
+
+def initialize_events():
+    executableCode = ""
+    for event in events.keys():
+        if event != "GreenFlag" and event != "any":
+            executableCode += "def " + event + "_():\n" + "\texec(events[\"" + event + "\"])\n" + "turtle.onkeypress(" + event + "_, \"" + event + "\")\n"
+        elif event == "any":
+            executableCode += "def " + event + "():\n" + "\texec(events[\"" + event + "\"])\n" + "turtle.onkeypress(" + event + ")\n"
+        elif event == "GreenFlag":
+            turtle.onclick(exec_GreenFlagEvent)
+    executableCode += "turtle.listen()"
+    exec(executableCode)
 
 
 parseMapper = {
@@ -290,48 +357,40 @@ parseMapper = {
     "WhenKeyPressed": WhenKeyPressed
 }
 
-
-def foo(x, y):
-    global Flag
-    Flag = True
-
-
 screen = turtle.getscreen()
+width, height = screen.window_width() - 30, screen.window_height() - 30  # -30 to account for window borders, etc.
 scratchName = "scratch.gif"
-# turtle.addshape(scratchName)
-
 turtle.shape("turtle")
 turtle.color('red', 'green')
 turtle.penup()
-# turtle.speed(1)
-# turtle.penup()
-
-# turtle_height = turtle.shapesize()[0]
-# turtle_width = turtle.shapesize()[1]
-turtle.shapesize(4, 4, 3)
+turtle.shapesize(3, 3, 2)
 text = turtle.Turtle()
 text.hideturtle()
 text.penup()
-# text.pendown()
 text.left(90)
 text.forward(70)
 text.right(90)
 text.forward(60)
 text.color('blue', 'black')
-# text.forward(200)
-# timer = threading.Timer(2.0, text.clear)
-# text.write("Hello World", move=False, font=('Courier', 15, 'normal'), align='left')
-# timer.start()
 
 # codeList = ["Repeat;10\nBegin\nSay;HELLOOOO\nTurnRight;90\nMoveSteps;Forward;45\nEnd"] #Parse()
 # codeList = [
-#     "WhenFlagClicked\nIfElse;( 40 ) > ( 50 )\nThen\nRepeat;3\nBegin\nThink;Hmm...\nTurnRight;15\nMoveSteps;Forward;15.0\nEnd\nEndThen\nElse\nRepeat;1\nBegin\nSay;Hello!\nTurnRight;90\nMoveSteps;Forward;40.0\nEnd\nEndElse",
-#     "WhenFlagClicked\nMoveSteps;Forward;90.0"]  # Parse()
-codeList = Parse()
-code = ""
+#     "WhenFlagClicked\nIfElse;( 40 ) > ( 50 )\nThen\nRepeat;3\nBegin\nThink;Hmm...\nTurnRight;15\nMoveSteps;Forward;15.0\nEnd\nEndThen\nElse\nRepeat;1\nBegin\nSay;Hello!\nTurnRight;45\nMoveSteps;Forward;40.0\nEnd\nEndElse",
+#     "WhenKeyPressed;a\nMoveSteps;Forward;10.0"]  # Parse()
+codeList = Parse('project.json')
+nonEventCode = ""
 for subcode in codeList:
-    code += ParseIntermediate(subcode) + "\n"
-print(code)
-exec(code)
+    code, isNonEventCode = ParseIntermediate(subcode)
+    if isNonEventCode:
+        nonEventCode += code + "\n"
+initialize_events()
+print(nonEventCode)
+exec(nonEventCode)
+
+# def up_():
+#     print("jjj")
+#     exec(events["up"])
+# turtle.onkeypress(up_, "a")
+# turtle.listen()
 screen.mainloop()
 
